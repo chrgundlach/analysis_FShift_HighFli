@@ -1,22 +1,25 @@
 %% parameters
 clearvars
-F.Pathlocal             = 'G:\work\data\SSVEP_FShift_Probabil\';
-F.Pathlocal             = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\';
+% F.Pathlocal             = 'G:\work\data\SSVEP_FShift_Probabil\';
+F.Pathlocal             = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\';
 
 
 F.PathInEEG             = fullfile(F.Pathlocal, 'eeg\epoch\');
 F.PathInBehavior        = fullfile(F.Pathlocal, 'behavior\');
 F.PathInSCADS           = fullfile(F.Pathlocal, 'eeg\SCADS\');
-F.PathOut               = fullfile(F.Pathlocal, 'eeg\tfa_v3\'); % with FWHM 0.5
+F.PathOut               = fullfile(F.Pathlocal, 'eeg\tfa\'); % with FWHM 0.5
 F.subjects              = arrayfun(@(x) sprintf('%02.0f',x),1:70,'UniformOutput',false)';
 % F.sub2use               = [6:13 15:18];%:53;
-F.sub2use               = [1:14 16:28];%
+F.sub2use               = [1:6];%
 
 % changed experiment from participant 22 onwards (stimuli isoluminant to background
 
-F.trigger               =   {[10 ]; ... %RDK1 + RDK2 attended; 
-                            [20 ]; ... %RDK2 + RDK3 attended
-                            [30 ]}; ... %RDK3 + RDK1 attended
+F.trigger               =   {[10 ]; ... %RDK1  attended conventional flicker
+                             [20 ]; ... %RDK2  attended conventional flicker
+                             [30 ]; ... %RDK1 attended HighFreqFlick I colored inlet
+                             [40 ]; ... %RDK2 attended HighFreqFlick I colored inlet
+                             [50 ]; ... %RDK1 attended HighFreqFlick II white inlet
+                             [60 ]}; ... %RDK2 attended HighFreqFlick II white inlet
 
 F.EEGChans              = 64;
 
@@ -30,8 +33,8 @@ F.TFAepoch              = [-1.5 2.5];
 F.CSD_flag              = 1; % 0 = no; 1 = yes
 
 F.FFT_timewins          = {[-1 0]; [0.5 1.5]; [1 2]}; % for v1
-F.FFT_timewins          = {[-0.5 0]; [0.25 0.75]; [0.75 1.25];[1 1.5];[1.25 1.75]}; % for v2
-F.FFT_timewins          = {[-0.75 0]; [0.25 1]; [1 1.75]}; % for v3
+% F.FFT_timewins          = {[-0.5 0]; [0.25 0.75]; [0.75 1.25];[1 1.5];[1.25 1.75]}; % for v2
+% F.FFT_timewins          = {[-0.75 0]; [0.25 1]; [1 1.75]}; % for v3
 F.FFT_freqres           = 16384;
 
 

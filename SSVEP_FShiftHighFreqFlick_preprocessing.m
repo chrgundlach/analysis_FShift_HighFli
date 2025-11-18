@@ -1,7 +1,6 @@
-% Script for analyzing EEG data from SSVEP_FShift_Prime1of2
+% Script for analyzing EEG data from SSVEP_FShift_HighFreqFlick
 %
-%
-% (c)    2015,2024 - C. Gundlach
+% (c)    2015,2024,2025 - C. Gundlach
 
 % 2016-07-19    added median filter for VEOG/HEOG to account for spiking artifacts
 
@@ -9,27 +8,30 @@
 %% General Definitions 
 clearvars
 % p.path=             'N:\AllgPsy\experimental_data\2024_FShiftPerIrr\';
-p.path=             '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\';
-p.bdf_path=         [p.path 'eeg\raw\'];
-p.set_path=         [p.path 'eeg\set\'];
-p.epoch_path=       [p.path 'eeg\epoch\'];
-p.scads_path=       [p.path 'eeg\SCADS\'];
+p.path=             '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\';
+p.bdf_path=         [p.path 'EEG\raw\'];
+p.set_path=         [p.path 'EEG\set\'];
+p.epoch_path=       [p.path 'EEG\epoch\'];
+p.scads_path=       [p.path 'EEG\SCADS\'];
 p.chanlocs_path=    'C:\Dropboxdata\Dropbox\work\matlab\Auswertungsskripte\Analyzer_G\ChanLocs\BioSemi64_1020.epf';
 % p.chanlocs_path=    'C:\Users\psy05cvd\Dropbox\work\matlab\Auswertungsskripte\Analyzer_G\ChanLocs\BioSemi64_1020.epf';
 % p.chanlocs_path=    'C:\Users\EEG\Documents\MATLAB\lab_library\BS_Chanlocs\BioSemi64_1020.epf';
 p.mean_path=        [p.path 'EEG\mean\'];
-p.exp_name=         'SSVEP_FShiftPerIrr';
+p.exp_name=         'SSVEP_FShiftHiFli';
 p.subs=             arrayfun(@(x) sprintf('%02.0f',x),1:60,'UniformOutput',false)';
 % from 4 onwards: same design
 % p.subs2use=         [6:13 16:18];%
-p.subs2use=         [28];%
+p.subs2use=         [5:6];%
 p.part=             {'_1';'_2';'_3'};
 % p.events =          {[10 11 12]; ... %RDK1 + RDK2 attended; 
 %                     [20 21 22]; ... %RDK2 + RDK3 attended
 %                     [30 31 32]}; ... %RDK3 + RDK1 attended
-p.events =          {[10 ]; ... %RDK1 + RDK2 attended; 
-                    [20 ]; ... %RDK2 + RDK3 attended
-                    [30 ]}; ... %RDK3 + RDK1 attended
+p.events =          {[10 ]; ... %RDK1  attended conventional flicker
+                     [20 ]; ... %RDK2  attended conventional flicker
+                     [30 ]; ... %RDK1 attended HighFreqFlick I colored inlet
+                     [40 ]; ... %RDK2 attended HighFreqFlick I colored inlet
+                     [50 ]; ... %RDK1 attended HighFreqFlick II white inlet
+                     [60 ]}; ... %RDK2 attended HighFreqFlick II white inlet
                     
 % p.events=           {100; 200};
 p.epoch=            [-1.5 2.5];
@@ -39,7 +41,7 @@ p.resample=         256;
 p.AnaScriptName=    'SSVEP_FShiftPerIrr_preprocessing';
 
 % flags
-ImportFlag=         0; % set to 1 if files have ti be importet from raw .bdf files
+ImportFlag=         1; % set to 1 if files have ti be importet from raw .bdf files
 EpochFlag=          1; % set to 1 if data has to be epoched
 MeanFlag=           0; % set to 1 to create mean files with trials averaged for each subject
 TopoFlag=           0;

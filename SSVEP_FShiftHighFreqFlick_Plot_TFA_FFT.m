@@ -1,34 +1,29 @@
 %% plot TFA images
 clearvars
-F.PathInEEG             = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\EEG\TFA'; % with FWHM 0.5
+F.PathInEEG             = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\EEG\TFA'; % with FWHM 0.5
 
 F.Subs                  = arrayfun(@(x) sprintf('%02.0f',x),1:70,'UniformOutput',false)';
 % F.Subs2use              = [1:13 15:21];
 % changed experiment from participant 22 onwards (stimuli isoluminant to
 % background and used other frequencies
 % participant 42 has lower trial number
-F.Subs2use              = [1:14 16:28]; % no sub 15
+F.Subs2use              = [1:6]; 
                         
 F.TFA.baseline          = [-500 -250];
 
-F.SSVEP_Freqs           = [17 20 23]; 
-F.RDK_pos               = [0 0 0];
-F.RDK_pos_label         = {'center';'center';'center'};
+F.SSVEP_Freqs           = [20 23 14 17]; 
+F.RDK_pos               = [0 0 -255 -255];
+F.RDK_pos_label         = {'center';'center'; 'left';'left'};
 
 
 
-F.conlabel_att = {'att RDK1+2';'att RDK2+3'; 'att RDK3+1'};
-F.conlabel_primedRDK = {'RDK1';'RDK2'; 'RDK3'};
-F.conlabel_nonprimedRDK = {'RDK2';'RDK3'; 'RDK1'};
-F.conRDKattended = logical([1 1 0; 0 1 1; 1 0 1]);
-F.conRDKprimed = logical([1 0 0; 0 1 0; 0 0 1]);
-F.conRDKnonprimed = logical([0 1 0; 0 0 1; 1 0 0]);
+F.conlabel_att = {'att RDK1';'att RDK2'; 'att RDK1';'att RDK2';'att RDK1';'att RDK2'};
+F.conRDKattended = logical([1 0 1 0; 0 1 0 1;1 0 1 0; 0 1 0 1;1 0 1 0; 0 1 0 1]);
 F.conRDKattended_label = repmat({'attended'},size(F.conRDKattended));
 F.conRDKattended_label(F.conRDKattended==0) = {'not attended'};
-F.conRDKprimed_label = F.conRDKattended_label;
-F.conRDKprimed_label(F.conRDKprimed==1) = {'primed'};
-F.conRDKprimed_label(F.conRDKnonprimed==1) = {'nonprimed'};
-
+F.con_flickertype = [1 1 2 2 3 3];
+F.conlabel_flicker = {'conventional';'conventional';'highfreq_col';'highfreq_col';'highfreq_white';'highfreq_white'};
+F.con_flickerfreq = [20 23 14 17; 20 23 14 17; 68 71 62 65 ; 68 71 62 65; 68 71 62 65; 68 71 62 65];
 
 pl.plegend = {'1';'0.5';'0.25';'0.1';'0.05';'0.01';'0.001';'0.0001';'0.00001'};
 pl.pcorrect = [0 abs(log10([0.5 0.25 0.1 0.05 0.01 0.001 0.0001 0.00001]))];
@@ -99,27 +94,35 @@ pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},
 % topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes', 'on','whitebk','on');
 topoplot([],TFA.electrodes(1:64),'whitebk','on','style','blank','electrodes', 'on', 'emarker2', {find(pl.elec2plot_i),'o','r',8});
 
-%% plot grand mean FFT data | spectra | for distinct frequencies (lookup of respective electrode cluster)
+%% plot grand mean FFT data | spectra | for subset of conditions
 
 % large center as in tango | periphery: central and lateral 
 pl.elec2plot = {{'P5';'PO3';'PO7';'O1';'I1';'POz';'Oz';'Iz';'P6';'PO4';'PO8';'O2';'I2'}, 'center'};
-pl.elec2plot = {{'P7';'P5';'P9';'PO3';'PO7';'O1';'I1';'POz';'Oz';'Iz';'P8';'P6';'PO4';'PO8';'P10';'O2';'I2'} 'center'};
+% pl.elec2plot = {{'P7';'P5';'P9';'PO3';'PO7';'O1';'I1';'POz';'Oz';'Iz';'P8';'P6';'PO4';'PO8';'P10';'O2';'I2'}, 'center'};
+pl.elec2plot = {{'POz';'Oz';'Iz';'P8';'P6';'PO4';'PO8';'P10';'O2';'I2'}, 'left'}; % topo peak in right hemisphere?
+
+
+pl.elec2plot = {{'PO7';'O1';'Oz';'O2';'PO8';'I1';'Iz';'I2'}, 'center'}; % topo peak in right hemisphere?
+pl.elec2plot = {{'PO3';'POz';'PO4';'O1';'Oz';'O2';'I1';'Iz';'I2'}, 'center'}; % topo peak in right hemisphere?
 
 pl.elec2plot_i=cellfun(@(y) ...
     logical(sum(cell2mat(cellfun(@(x) strcmpi({TFA.electrodes.labels},x), y, 'UniformOutput',false)),1)),...
     pl.elec2plot(:,1), 'UniformOutput', false);
 
-
 % pl.time2plot = [1];
-pl.time2plot = [1];
+pl.time2plot = [1:3];
 pl.sub2plot = 1:numel(F.Subs2use);
-pl.sub2plot(ismember(F.Subs2use,5))=[]; % participant 5 has no ssveps
 
+pl.con2plot = [1 2];
+pl.con2plot = [3 4];
+% pl.con2plot = [5 6];
 
 % extract data
-pl.data_ind = squeeze(mean(TFA.fftdata_ind(:,pl.elec2plot_i{1},:,pl.time2plot,pl.sub2plot),[2,3,4]));
-pl.data_evo = squeeze(mean(TFA.fftdata_evo(:,pl.elec2plot_i{1},:,pl.time2plot,pl.sub2plot),[2,3,4]));
+pl.data_ind = squeeze(mean(TFA.fftdata_ind(:,pl.elec2plot_i{1},pl.con2plot,pl.time2plot,pl.sub2plot),[2,3,4]));
+pl.data_evo = squeeze(mean(TFA.fftdata_evo(:,pl.elec2plot_i{1},pl.con2plot,pl.time2plot,pl.sub2plot),[2,3,4]));
 
+% FOI determined by cons and position
+pl.FOI = F.con_flickerfreq(pl.con2plot(1),strcmp(F.RDK_pos_label,pl.elec2plot{2}));
 
 % plotting
 figure;
@@ -129,12 +132,12 @@ plot(TFA.fftfreqs,pl.data_ind,'Color',[0.5 0.5 0.5],'LineWidth',1)
 hold on;
 plot(TFA.fftfreqs,mean(pl.data_ind,2),'Color','k','LineWidth',2)
 
-xlim([0 50])
+xlim([0 75])
 xlabel('frequency in Hz')
 ylabel('amplitude in \muV/m²')
-title(sprintf('induced GrandMean FFT spectra | N = %1.0f | FOI = %1.1f %1.1f %1.1f Hz', ...
-    numel(pl.sub2plot), F.SSVEP_Freqs),'Interpreter','none')
-vline(F.SSVEP_Freqs,'k:')
+title(sprintf('induced GrandMean FFT spectra | N = %1.0f | FOI = %1.1f %1.1f  Hz', ...
+    numel(pl.sub2plot),pl.FOI),'Interpreter','none')
+vline(pl.FOI,'k:')
 % draw topography with electrode positions
 h.a1 = axes('position',[0.72 0.75 0.15 0.15],'Visible','off');
 topoplot(find(any(cell2mat(pl.elec2plot_i))),TFA(1).electrodes(1:64),'style','blank','electrodes', 'on','whitebk','on',...
@@ -144,12 +147,12 @@ subplot(2,1,2)
 hold on;
 plot(TFA.fftfreqs,pl.data_evo,'Color',[0.5 0.5 0.5],'LineWidth',1)
 plot(TFA.fftfreqs,mean(pl.data_evo,2),'Color','k','LineWidth',2)
-xlim([0 50])
+xlim([0 75])
 xlabel('frequency in Hz')
 ylabel('amplitude in \muV/m²')
-title(sprintf('evoked GrandMean FFT spectra | N = %1.0f | FOI = %1.1f %1.1f %1.1f Hz', ...
-    numel(pl.sub2plot), F.SSVEP_Freqs),'Interpreter','none')
-vline(F.SSVEP_Freqs,'k:')
+title(sprintf('evoked GrandMean FFT spectra | N = %1.0f | FOI = %1.1f %1.1f Hz', ...
+    numel(pl.sub2plot), pl.FOI),'Interpreter','none')
+vline(pl.FOI,'k:')
 box on
 
 % draw topography with electrode positions
@@ -162,38 +165,55 @@ topoplot(find(any(cell2mat(pl.elec2plot_i))),TFA(1).electrodes(1:64),'style','bl
 %% plot Grand Mean FFT data | topoplot for different frequencies
 pl.time2plot = [1:3];
 pl.time2plot = [1];
-pl.freq2plot = F.SSVEP_Freqs(3);
+% pl.freq2plot = [1 0 0 0]==1;
+pl.freq2plot = [0 1 0 0]==1;
+% pl.freq2plot = [0 0 1 0]==1;
+% pl.freq2plot = [0 0 0 1]==1;
 pl.freqrange=[-0.1 0.1];
 pl.sub2sel = 1:numel(F.Subs2use);
 
+% pl.con2plot = [1 2];
+% pl.con2plot = [3 4];
+pl.con2plot = [5 6];
 
-t.idx = dsearchn(TFA.fftfreqs',(pl.freqrange+pl.freq2plot)');
-pl.data_ind = squeeze(mean(TFA.fftdata_ind(t.idx(1):t.idx(2),:,:,pl.time2plot,pl.sub2sel),[1 3 4 ]));
-pl.data_evo = squeeze(mean(TFA.fftdata_evo(t.idx(1):t.idx(2),:,:,pl.time2plot,pl.sub2sel),[1 3 4 ]));
+pl.FOI=F.con_flickerfreq(pl.con2plot(1),pl.freq2plot);
+
+
+
+t.idx = dsearchn(TFA.fftfreqs',(pl.freqrange+pl.FOI)');
+% pl.data_ind = squeeze(mean(TFA.fftdata_ind(t.idx(1):t.idx(2),:,:,pl.time2plot,pl.sub2sel),[1 3 4 ]));
+pl.data_evo = squeeze(mean(TFA.fftdata_evo(t.idx(1):t.idx(2),:,pl.con2plot,pl.time2plot,pl.sub2sel),[1 3 4 ]));
+
+% try to subtract general topo?
+pl.FOI2 = [min(F.con_flickerfreq(pl.con2plot(1),:))-3 max(F.con_flickerfreq(pl.con2plot(1),:))+3];
+t.idx2 = dsearchn(TFA.fftfreqs',[pl.freqrange+pl.FOI2(1) pl.freqrange+pl.FOI2(2)]');
+pl.data_evo_ctr = squeeze(mean(TFA.fftdata_evo([t.idx2(1):t.idx2(2) t.idx2(3):t.idx2(4)],:,pl.con2plot,pl.time2plot,pl.sub2sel),[1 3 4 ]));
+pl.data_evo = pl.data_evo-pl.data_evo_ctr;
 
 
 figure;
-set(gcf,'Position',[100 100 800 300],'PaperPositionMode','auto')
+set(gcf,'Position',[100 100 300 300],'PaperPositionMode','auto')
 
-% induced
-h.s(1) = subplot(1,2,1);
-pl.mdata = mean(pl.data_ind,2,'omitnan');
-pl.clim = [0 max(pl.mdata)];
-topoplot(pl.mdata, TFA.electrodes(1:64), ...
-    'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
-    'whitebk','on');
-title(sprintf('induced SSVEP amps for %1.1f +- [%1.1f  %1.1f] Hz | [%1.0f %1.0f]ms', ...
-    pl.freq2plot, pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000))
-colorbar
+% % induced
+% h.s(1) = subplot(1,2,1);
+% pl.mdata = mean(pl.data_ind,2,'omitnan');
+% pl.clim = [0 max(pl.mdata)];
+% topoplot(pl.mdata, TFA.electrodes(1:64), ...
+%     'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
+%     'whitebk','on');
+% title(sprintf('induced SSVEP amps for %1.1f +- [%1.1f  %1.1f] Hz | [%1.0f %1.0f]ms', ...
+%     pl.FOI, pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000))
+% colorbar
 
-h.s(2) = subplot(1,2,2);
+% h.s(2) = subplot(1,2,2);
 pl.mdata = mean(pl.data_evo,2,'omitnan');
 pl.clim = [0 max(pl.mdata)];
 topoplot(pl.mdata, TFA.electrodes(1:64), ...
     'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
     'whitebk','on');
-title(sprintf('evoked SSVEP amps for %1.1f +- [%1.1f  %1.1f] Hz | [%1.0f %1.0f]ms', ...
-    pl.freq2plot, pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000))
+title(sprintf('SSVEP amps %1.1f +- [%1.1f  %1.1f] Hz\n [%1.0f %1.0f]ms | %s', ...
+    pl.FOI, pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000, ...
+    F.RDK_pos_label{pl.freq2plot}))
 colorbar
 
 
@@ -201,41 +221,73 @@ colorbar
 %% plot Grand Mean FFT data | topoplot for all SSVEP frequencies
 pl.time2plot = [1:3];
 pl.time2plot = [1];
-pl.freq2plot = F.SSVEP_Freqs;
+pl.con2plot = [1 2;3 4;5 6];
+pl.pos2plot = {'center';'left'};
 pl.freqrange=[-0.1 0.1];
 pl.sub2sel = 1:numel(F.Subs2use);
 
+pl.data_evo = []; pl.data_evo_subt = []; t.FOI = [];
+for i_con = 1:size(pl.con2plot,1)
+    for i_pos = 1:numel(pl.pos2plot)
+        % frequencies of interest
+        t.FOI(:,i_con,i_pos) = unique(F.con_flickerfreq(pl.con2plot(i_con,:),strcmp(F.RDK_pos_label,pl.pos2plot{i_pos})));
+        t.FOI2 = [min(F.con_flickerfreq(pl.con2plot(i_con,:),:),[],"all")-3 max(F.con_flickerfreq(pl.con2plot(i_con,:),:),[],"all")+3];
+        
+        % index frequencies
+        t.t = dsearchn(TFA.fftfreqs',reshape((pl.freqrange+t.FOI(:,i_con,i_pos))',1,[])');
+        t.fidx = unique(cell2mat(arrayfun(@(x,y) x:y,t.t(1:2:end),t.t(2:2:end),'UniformOutput',false)));
+        t.t2 = dsearchn(TFA.fftfreqs',reshape((pl.freqrange+t.FOI2)',1,[])');
+        t.fidx2 = unique(cell2mat(arrayfun(@(x,y) x:y,t.t2(1:2:end),t.t2(2:2:end),'UniformOutput',false)));
 
-t.idx = arrayfun(@(x) dsearchn(TFA.fftfreqs', (pl.freqrange+x)'), pl.freq2plot, 'UniformOutput', false);
-
-% extract data
-pl.data_evo = [];
-for i_freq = 1:numel(t.idx)
-    pl.data_evo(:,i_freq) = squeeze(mean(TFA.fftdata_evo(t.idx{i_freq}(1):t.idx{i_freq}(2),:,:,pl.time2plot,pl.sub2sel),[1 3 4 5]))';
-end
-pl.data_evo(:,end+1)=mean(pl.data_evo,2);
-
-
-figure;
-set(gcf,'Position',[100 100 1100 300],'PaperPositionMode','auto')
-
-h = [];
-for i_freq = 1:size(pl.data_evo,2)
-    h.s(i_freq) = subplot(1,size(pl.data_evo,2),i_freq);
-    pl.clim = [0 max(pl.data_evo,[],"all")];
-    pl.clim = [0 max(pl.data_evo(:,i_freq),[],"all")];
-    topoplot(pl.data_evo(:,i_freq), TFA.electrodes(1:64), ...
-        'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
-        'whitebk','on');
-    if i_freq < size(pl.data_evo,2) 
-        title(sprintf('evo SSVEP %1.1f +- [%1.1f  %1.1f] Hz\n[%1.0f %1.0f]ms', ...
-            pl.freq2plot(i_freq), pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000))
-    else
-        title(sprintf('evo SSVEPs | freq averaged\n[%1.0f %1.0f]ms', ...
-             min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000))
+        % extract data
+        pl.data_evo(:,i_con,i_pos) = squeeze(mean(TFA.fftdata_evo(t.fidx,:,pl.con2plot(i_con,:),pl.time2plot,pl.sub2sel),[1 3 4 5]))';
+        pl.data_evo_subt(:,i_con,i_pos) = pl.data_evo(:,i_con,i_pos) - ...
+            squeeze(mean(TFA.fftdata_evo(t.fidx2,:,pl.con2plot(i_con,:),pl.time2plot,pl.sub2sel),[1 3 4 5]))';
     end
-    colorbar
 end
+
+% plot data
+figure;
+set(gcf,'Position',[100 100 1100 400],'PaperPositionMode','auto')
+
+h = []; pl.num = 1;
+for i_pos = 1:numel(pl.pos2plot)
+    for i_con = 1:size(pl.con2plot,1)
+        h.s(i_con,i_pos) = subplot(numel(pl.pos2plot),size(pl.con2plot,1),pl.num);
+        pl.clim = [0 max(pl.data_evo(:,i_con,:),[],"all")];
+        topoplot(pl.data_evo(:,i_con,i_pos), TFA.electrodes(1:64), ...
+            'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
+            'whitebk','on');
+        title(sprintf('evo SSVEP [%1.1f %1.1f] +- [%1.1f  %1.1f] Hz\n[%1.0f %1.0f]ms | %s | %s', ...
+            t.FOI(:,i_con,i_pos), pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000, ...
+            pl.pos2plot{i_pos}, F.conlabel_flicker{pl.con2plot(i_con,1)}), "FontSize",8, "Interpreter","none")
+        colorbar
+        pl.num = pl.num+1;
+    end
+end
+
+
+% plot data for which neighboring frequencies were subtracted
+figure;
+set(gcf,'Position',[100 100 1100 400],'PaperPositionMode','auto')
+
+h = []; pl.num = 1;
+for i_pos = 1:numel(pl.pos2plot)
+    for i_con = 1:size(pl.con2plot,1)
+        h.s(i_con,i_pos) = subplot(numel(pl.pos2plot),size(pl.con2plot,1),pl.num);
+        pl.clim = [0 max(pl.data_evo_subt(:,i_con,:),[],"all")];
+        topoplot(pl.data_evo_subt(:,i_con,i_pos), TFA.electrodes(1:64), ...
+            'shading', 'interp', 'numcontour', 0, 'maplimits',pl.clim,'conv','on','colormap',fake_parula,...
+            'whitebk','on');
+        title(sprintf('evo subtr SSVEP [%1.1f %1.1f] +- [%1.1f  %1.1f] Hz\n[%1.0f %1.0f]ms | %s | %s', ...
+            t.FOI(:,i_con,i_pos), pl.freqrange, min([TFA.ffttimewin{pl.time2plot}])*1000, max([TFA.ffttimewin{pl.time2plot}])*1000, ...
+            pl.pos2plot{i_pos}, F.conlabel_flicker{pl.con2plot(i_con,1)}), "FontSize",8, "Interpreter","none")
+        colorbar
+        pl.num = pl.num+1;
+    end
+end
+
+
 
 
 %% plot FFT data modulation | topoplot effects on central stimuli
