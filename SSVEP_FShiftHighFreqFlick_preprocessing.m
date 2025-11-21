@@ -21,7 +21,7 @@ p.exp_name=         'SSVEP_FShiftHiFli';
 p.subs=             arrayfun(@(x) sprintf('%02.0f',x),1:60,'UniformOutput',false)';
 % from 4 onwards: same design
 % p.subs2use=         [6:13 16:18];%
-p.subs2use=         [5:6];%
+p.subs2use=         [7:8];%
 p.part=             {'_1';'_2';'_3'};
 % p.events =          {[10 11 12]; ... %RDK1 + RDK2 attended; 
 %                     [20 21 22]; ... %RDK2 + RDK3 attended
