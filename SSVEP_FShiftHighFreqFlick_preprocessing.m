@@ -2,8 +2,6 @@
 %
 % (c)    2015,2024,2025 - C. Gundlach
 
-% 2016-07-19    added median filter for VEOG/HEOG to account for spiking artifacts
-
 
 %% General Definitions 
 clearvars
@@ -21,11 +19,9 @@ p.exp_name=         'SSVEP_FShiftHiFli';
 p.subs=             arrayfun(@(x) sprintf('%02.0f',x),1:60,'UniformOutput',false)';
 % from 4 onwards: same design
 % p.subs2use=         [6:13 16:18];%
-p.subs2use=         [7:8];%
+p.subs2use=         [1:8];%
 p.part=             {'_1';'_2';'_3'};
-% p.events =          {[10 11 12]; ... %RDK1 + RDK2 attended; 
-%                     [20 21 22]; ... %RDK2 + RDK3 attended
-%                     [30 31 32]}; ... %RDK3 + RDK1 attended
+
 p.events =          {[10 ]; ... %RDK1  attended conventional flicker
                      [20 ]; ... %RDK2  attended conventional flicker
                      [30 ]; ... %RDK1 attended HighFreqFlick I colored inlet
@@ -36,7 +32,7 @@ p.events =          {[10 ]; ... %RDK1  attended conventional flicker
 % p.events=           {100; 200};
 p.epoch=            [-1.5 2.5];
 p.epoch2an=         [-1 2];
-p.resample=         256;
+p.resample=         512;
 
 p.AnaScriptName=    'SSVEP_FShiftPerIrr_preprocessing';
 
@@ -74,23 +70,8 @@ for i_sub=1:numel(p.subs2use)
             end
         end
         
-%         % troubleshooting
-%         if any(unique([EEG.event.type])>16128)
-%             t.triggernew = num2cell([EEG.event.type]-16128);
-%             [EEG.event.type]=t.triggernew{:};
-%             [EEG.urevent.type]=t.triggernew{:};
-%         end
-        
-        % added median filter
-        %EEG.data([65 66 67 68],:) = medfilt1(EEG.data([65 66 67 68],:),ceil(EEG.srate/40),length(EEG.data),2);
-        
         % resample
         EEG=pop_resample(EEG,p.resample);
-        
-        %
-%         figure; pwelch(EEG.data(29,:),EEG.srate*1,EEG.srate/2,256,EEG.srate)
-%         figure; pop_eegplot(EEG,1,1,1)
-%         figure; pwelch(EEG.data(45,1320*256:1324*256),EEG.srate*1,EEG.srate/2,256,EEG.srate)
         
         % check trigger
         trigg.all = unique(cell2mat({EEG.event.type}));
@@ -161,8 +142,6 @@ for i_sub=1:numel(p.subs2use)
         EEG.chanlocs = pop_chanedit(EEG.chanlocs,'load',{p.chanlocs_path,'filetype','besa'});
         % pop_eegplot(EEG,1,1,1)
         
-        % filter before SCADS (is this a good idea?)
-%         EEG = pop_eegfiltnew(EEG, 0.7, 0, 16*EEG.srate, 0, [], 0);
         
         % run SCADS to statistically detect artifacts
         [EEG Trials2Del SumData] = SCADS_Pass1(EEG,p.epoch2an,[6 6 15],1);%,[6 5 15]);  % ansonsten SCADS_Pass1()
