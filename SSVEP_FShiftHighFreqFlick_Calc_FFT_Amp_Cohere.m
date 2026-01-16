@@ -11,7 +11,7 @@ F.PathOut               = fullfile(F.Pathlocal, 'eeg\fft\'); % with FWHM 0.5
 F.subjects              = arrayfun(@(x) sprintf('%02.0f',x),1:70,'UniformOutput',false)';
 % F.sub2use               = [6:13 15:18];%:53;
 % F.sub2use               = [1:8];%
-F.sub2use               = [1:8];%
+F.sub2use               = [21 22];%
 
 % changed experiment from participant 22 onwards (stimuli isoluminant to background
 

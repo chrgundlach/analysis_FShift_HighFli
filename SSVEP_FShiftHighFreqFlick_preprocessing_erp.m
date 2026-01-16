@@ -7,8 +7,8 @@
 
 %% General Definitions 
 clearvars
-p.path=             '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\';
-p.bdf_path=         '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\eeg\raw\';
+p.path=             '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\';
+p.bdf_path=         '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\eeg\raw\';
 p.set_path=         [p.path 'eeg\set\'];
 p.epoch_path=       [p.path 'eeg\epoch_erp\'];
 p.scads_path=       [p.path 'eeg\SCADS_erp\'];
@@ -16,22 +16,32 @@ p.chanlocs_path=    'C:\Dropboxdata\Dropbox\work\matlab\Auswertungsskripte\Analy
 % p.chanlocs_path=    ['C:\Users\EEG\Documents\MATLAB\lab_library\BS_Chanlocs\BioSemi64_1020.epf'];
 p.mean_path=        [p.path 'eeg\mean\'];
 p.subs=             cellfun(@(x) sprintf('%02.0f',x),num2cell(1:60),'UniformOutput', false)';
-p.subs2use=         [1:14 16:28];%
-p.subs2use=         [2];%
-p.part=             {'1';'2';'3'};
-p.cue =          {[10 11 12 ]; ... %att RDK1+2
-                    [20 21 22]; ... %att RDK2+3
-                    [30 31 32 ]};    %att RDK3+1
-p.events=           {[111] [112] [113]}; % trigger for events in trial (up to two possible)
+p.subs2use=         [1:20];%
+p.subs2use=         [18];%
+p.part=             {'_1';'_2';'_3'};
+p.cue =             {[11 12 16 17 18 19]; ...   %RDK1  attended conventional flicker [t; d; t+t; t+d; d+t; d+d]
+                    [21 22 26 27 28 29]; ...    %RDK2  attended conventional flicker
+                    [31 32 36 37 38 39]; ...    %RDK1 attended HighFreqFlick I colored inlet
+                    [41 42 46 47 48 49]; ...    %RDK2 attended HighFreqFlick I colored inlet
+                    [51 52 56 57 58 59]; ...    %RDK1 attended HighFreqFlick II white inlet
+                    [61 62 66 67 68 69]};       %RDK2 attended HighFreqFlick II white inlet
+p.events=           {[201 202]};                % target distractor
 p.con1name =        'type';
-p.con1label =       {'target primed';'target nonprimed';'distractor'};
+p.con1label =       {'target';'distractor';'hi'};
+p.con2name =        'condition';
+p.con2label =       {'conventional';'conventional';'highfreq_col';'highfreq_col';'highfreq_white';'highfreq_white'};
+p.con3name =        'attention';
+p.con3label =       {'att RDK1';'att RDK2'; 'att RDK1';'att RDK2';'att RDK1';'att RDK2'};
 p.cue_epoch=        [-1 3.5];
 p.event_epoch=      [-1 1.5];
 % p.epoch2an=         [-1 3.25]; % not so conservative
 p.epoch2an=         [-0.5 1]; % not so conservative
 p.resample=         256;
 
-p.AnaScriptName=    'SSVEP_FShift_Prime1of2_preprocessing';
+% for troubleshooting
+p.blocknum =        20;
+
+p.AnaScriptName=    'FShiftHiFli_preprocessing_erp';
 
 % flags
 ImportFlag=         1; % set to 1 if files have ti be importet from raw .bdf files
@@ -47,7 +57,7 @@ for i_sub=1:numel(p.subs2use)
     if ~MeanFlag || ((MeanFlag && EpochFlag) || (ImportFlag && EpochFlag && MeanFlag) || (MeanFlag && ~TopoFlag)),end
     
     %% import
-    if ImportFlag    %% Import Files and merge %%
+    if ImportFlag & EpochFlag   %% Import Files and merge %%
         % load file
 %         EEG=pop_biosig([p.bdf_path FileName '.bdf']);
         % load data
@@ -56,6 +66,7 @@ for i_sub=1:numel(p.subs2use)
         for i_fi = 1:numel(temp.files)
             EEG(i_fi)=pop_readbdf(sprintf('%s%s',p.bdf_path,temp.files(i_fi).name),[],73,[]);
         end
+        
         if numel(EEG)>1,EEG=pop_mergeset(EEG,1:numel(EEG),0); end
         %pop_eegplot(EEG,1,1,1)
         
@@ -67,19 +78,45 @@ for i_sub=1:numel(p.subs2use)
             end
         end
         
-        % troubleshooting
-        if any(unique([EEG.event.type])>16128 & unique([EEG.event.type])~=9999999)
-            t.triggernew = num2cell([EEG.event.type]-16128);
-            [EEG.event.type]=t.triggernew{:};
-            [EEG.urevent.type]=t.triggernew{:};
-        end
-        
+        % % troubleshooting
+        % if any(unique([EEG.event.type])>16128 & unique([EEG.event.type])~=9999999)
+        %     t.triggernew = num2cell([EEG.event.type]-16128);
+        %     [EEG.event.type]=t.triggernew{:};
+        %     [EEG.urevent.type]=t.triggernew{:};
+        % end
+        % 
         % added median filter
         %EEG.data([65 66 67 68],:) = medfilt1(EEG.data([65 66 67 68],:),ceil(EEG.srate/40),length(EEG.data),2);
         
         % resample
         EEG=pop_resample(EEG,p.resample);
-        
+
+        % attempt to save data: there is often a mismatch between behavior and EEG data as recordings might be stopped in
+        % between blocks
+        % first find the timings of start trigger
+        if numel(EEG.event([EEG.event.type]==253)) > p.blocknum*2
+            t.time_blockstarts = [EEG.event([EEG.event.type]==253).latency]./EEG.srate;
+            % calculate difference
+            t.time_blockstarts_diff = [0 diff(t.time_blockstarts)];
+            % find differences that are smaller than the mean + 2SD and account for double presentation of the start cue
+            t.idx = t.time_blockstarts_diff > .05 & ... % excludes double presentation cues
+                ... % now look for differences smaller than mean + 1 sd which speak in favor of a shorter block due to stopping in between
+                t.time_blockstarts_diff < mean(t.time_blockstarts_diff(t.time_blockstarts_diff > .05))-1*std(t.time_blockstarts_diff(t.time_blockstarts_diff > .05));
+            if sum(t.idx)==1
+                EEG = pop_select( EEG, 'rmtime',[ t.time_blockstarts(find(t.idx)+[-1 0]) - 0.5] );
+
+                % convert back to numerical values
+                if sum(strcmp({EEG.event.type},'boundary'))~=0
+                    EEG.event(strcmp({EEG.event.type},'boundary')).type = '9999999';
+                    for i_ev = 1:numel(EEG.event)
+                        EEG.event(i_ev).type = str2num(EEG.event(i_ev).type);
+                    end
+                end
+            else
+                break; fprintf('\nABORT ABORT\n')
+            end
+        end
+   
         %
 %         figure; pwelch(EEG.data(29,:),EEG.srate*1,EEG.srate/2,256,EEG.srate)
         
@@ -89,19 +126,6 @@ for i_sub=1:numel(p.subs2use)
         trigg.sum = [trigg.all; trigg.freq];
         trigg.events = cellfun(@(x) sum(ismember(cell2mat({EEG.event.type}), x)), p.events);
         
-        
-        % save in new format
-        if ~exist(p.set_path); mkdir(p.set_path);end
-        EEG = pop_saveset(EEG,'filename',[FileName '.set'], 'filepath', p.set_path);
-        clear ('EEG');
-    end
-    
-    %% epoch Bipolarize, Remove Baseline, Detrend, Blinks + EyeMovements Threshold, SCADS%%
-    if EpochFlag
-        % load
-        EEG = pop_loadset('filename',[FileName '.set'], 'filepath', p.set_path);
-        % pop_eegplot(EEG,1,1,1)
-
         % epoch data around cue
         EEG_cue = pop_epoch( EEG, num2cell(unique(cell2mat(p.cue))), p.cue_epoch, 'epochinfo', 'yes');
 

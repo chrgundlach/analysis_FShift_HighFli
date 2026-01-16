@@ -6,7 +6,7 @@ p.path =                '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_da
 p.subs=                 arrayfun(@(x) sprintf('%02.0f',x),1:70,'UniformOutput',false)';
 % p.subs2use=             [1:13 15:21];% 
 % changed experiment from participant 22 onwards (stimuli isoluminant to background
-p.subs2use=             [1:8];%
+p.subs2use=             [1:20];%
 
 % p.subs2use=             [1:10];% %VP 15 no data
 p.responsewin =         [0.2 1]; % according to p.targ_respwin from run_posnalpha
@@ -18,6 +18,8 @@ p.eventtype =           {'target';'distractor'};
 
 
 p.flickertype =        {'conventional';'conventional';'highfreq_col';'highfreq_col';'highfreq_white';'highfreq_white'};
+
+p.colnames2change =     {'blue', 'green'};
 
 
 
@@ -114,10 +116,18 @@ for i_sub = 1:numel(p.subs2use)
     t.data_eventRDK = [data_all_struct.eventRDK]; % RDK of event
     t.data_eventcolorname = repmat({''},size(t.data_eventRDK));
     for i_rdk = 1:numel(data_in.RDK)
-        t.data_eventcolorname(t.data_eventRDK==i_rdk)=deal({data_in.RDK(i_rdk).colnames});
+        if strcmp(p.colnames2change(1,1),data_in.RDK(i_rdk).colnames)
+            t.data_eventcolorname(t.data_eventRDK==i_rdk)=p.colnames2change(1,2);
+        else
+            t.data_eventcolorname(t.data_eventRDK==i_rdk)=deal({data_in.RDK(i_rdk).colnames});
+        end
     end
     t.data_eventfreq = nan(size(t.data_eventRDK));
-    t.data_eventfreq(t.evidx)=arrayfun(@(x) data_in.RDK(x).freq, t.data_eventRDK(t.evidx));
+    % index differerent event frequencies
+    t.idx = t.data_condition <=2; % conventional flicker
+    t.data_eventfreq(t.evidx&t.idx)=arrayfun(@(x) data_in.RDK(x).freq, t.data_eventRDK(t.evidx&t.idx));
+    t.idx = t.data_condition >2; % inlet flicker
+    t.data_eventfreq(t.evidx&t.idx)=arrayfun(@(x) data_in.RDK(x).in_freq, t.data_eventRDK(t.evidx&t.idx));
     t.data_eventnum = repmat([1;2],1,size(t.evidx,2)).*t.evidx;
 
     t.data_response = repmat({''},size(t.data_eventRDK));

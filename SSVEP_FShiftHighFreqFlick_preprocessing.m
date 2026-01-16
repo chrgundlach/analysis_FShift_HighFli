@@ -17,9 +17,8 @@ p.chanlocs_path=    'C:\Dropboxdata\Dropbox\work\matlab\Auswertungsskripte\Analy
 p.mean_path=        [p.path 'EEG\mean\'];
 p.exp_name=         'SSVEP_FShiftHiFli';
 p.subs=             arrayfun(@(x) sprintf('%02.0f',x),1:60,'UniformOutput',false)';
-% from 4 onwards: same design
-% p.subs2use=         [6:13 16:18];%
-p.subs2use=         [1:8];%
+
+p.subs2use=         [21:22];%
 p.part=             {'_1';'_2';'_3'};
 
 p.events =          {[10 ]; ... %RDK1  attended conventional flicker
@@ -93,6 +92,7 @@ for i_sub=1:numel(p.subs2use)
         
         % epoch data
         EEG = pop_epoch( EEG, num2cell(unique(cell2mat(p.events))), p.epoch, 'epochinfo', 'yes');
+        % pop_eegplot(EEG,1,1,1)
         
         % keep track of discarded trials
         PreProc.trial_nr = 1:numel(EEG.epoch);
@@ -125,6 +125,7 @@ for i_sub=1:numel(p.subs2use)
         % subtracting channels (e.g. VEOG1-VEOG2) from each other to
         % increase SNR of blinks and eye movements
         EEG = eegF_Bipolarize(EEG);
+        % pop_eegplot(EEG,1,1,1)
         
         % remove linear drift and offset of EEG signals
         EEG = eegF_Detrend(EEG,p.epoch2an); % 
@@ -158,6 +159,7 @@ for i_sub=1:numel(p.subs2use)
         EEG = pop_rejepoch(EEG, EEG.reject.rejmanual, 0);
         % rereference to average reference
         EEG=pop_reref(EEG,[],'refstate',0);   %
+         % pop_eegplot(EEG,1,1,1)
         
         if ~exist(p.scads_path); mkdir(p.scads_path);end
         if ~exist(p.epoch_path); mkdir(p.epoch_path);end

@@ -4,17 +4,22 @@ clearvars
 
 %% parameters
 % general parameters
-F.PathIn            = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShift_Prime1of2\EEG\SCADS\'; % with FWHM 0.5
+F.PathIn            = '\\smbone.dom.uni-leipzig.de\FFL\AllgPsy\experimental_data\2025_FShiftHiFli\EEG\SCADS\'; % with FWHM 0.5
 F.subjects          = cellfun(@(x) sprintf('%02.0f',x),num2cell(1:60),'UniformOutput', false)';
 % F.subs2use          = [9 10 11 12];%
-F.subs2use          = [1:14 16:28];
-F.con2an            ={[10 ]; ... %RDK1 attended; RDK1 and RDK2 colors in periphery peri attended + unattended
-                    [20 ]; ... %RDK2 attended; RDK1 and RDK2 colors in periphery peri attended + unattended
-                    [30 ]; ... %RDK1 attended; RDK1 and RDK3 colors in periphery peri attended + irrelevant
-                    };    %RDK2 attended; RDK1 and RDK3 colors in periphery peri unattended + irrelevant
-F.con2an_label      = {'att RDK1 & RDK2';
-    'att RDK2 & RDK3';
-    'att RDK3 & RDK1';};
+F.subs2use          = [1:20];
+F.con2an            ={[10 ]; ... %RDK1  attended conventional flicker
+                        [20 ]; ... %RDK2  attended conventional flicker
+                        [30 ]; ... %RDK1 attended HighFreqFlick I colored inlet
+                        [40 ]; ... %RDK2 attended HighFreqFlick I colored inlet
+                        [50 ]; ... %RDK1 attended HighFreqFlick II white inlet
+                        [60 ]}; ... %RDK2 attended HighFreqFlick II white inlet
+F.con2an_label = {'att RDK1 | conventional';
+            'att RDK2 | conventional';
+            'att RDK1 | highfreq col';
+            'att RDK2 | highfreq col';
+            'att RDK1 | highfreq white';
+            'att RDK2 | highfreq white'};
 
 %% loop across subjects to extract
 for i_sub = 1:numel(F.subs2use)
